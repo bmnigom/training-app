@@ -3,25 +3,37 @@ import { collection, query, where, orderBy, getDocs } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 import { useAuth } from '../../contexts/AuthContext'
 import SessionFeedback from './SessionFeedback'
+import EditSession from './EditSession'
 
 export default function SessionHistory() {
     const { user } = useAuth()
     const [sessions, setSessions] = useState([])
     const [loading, setLoading] = useState(true)
+    const [editing, setEditing] = useState(null)
 
-    useEffect(() => {
-        async function fetchSessions() {
-            const q = query(
-                collection(db, 'executedSessions'),
-                where('userId', '==', user.uid),
-                orderBy('date', 'desc')
-            )
-            const snap = await getDocs(q)
-            setSessions(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-            setLoading(false)
-        }
-        fetchSessions()
-    }, [user.uid])
+    useEffect(() => { fetchSessions() }, [])
+
+    async function fetchSessions() {
+        setLoading(true)
+        const q = query(
+            collection(db, 'executedSessions'),
+            where('userId', '==', user.uid),
+            orderBy('date', 'desc')
+        )
+        const snap = await getDocs(q)
+        setSessions(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+        setLoading(false)
+    }
+
+    if (editing) {
+        return (
+            <EditSession
+                session={editing}
+                onBack={() => { setEditing(null); fetchSessions() }}
+                onDeleted={() => { setEditing(null); fetchSessions() }}
+            />
+        )
+    }
 
     if (loading) return <p className="text-center text-gray-400 py-12">Cargando...</p>
 
@@ -41,11 +53,19 @@ export default function SessionHistory() {
                             <p className="font-bold text-gray-800">{s.sessionType}</p>
                             <p className="text-xs text-gray-400 mt-0.5">{s.date}</p>
                         </div>
-                        <div className="text-right space-y-1">
-              <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-medium block">
-                RPE {s.rpe && s.rpe.value} - {s.rpe && s.rpe.scale}
-              </span>
-                            {s.bodyWeight && <p className="text-xs text-gray-400">{s.bodyWeight} kg</p>}
+                        <div className="flex items-start gap-3">
+                            <div className="text-right space-y-1">
+                <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-medium block">
+                  RPE {s.rpe && s.rpe.value} - {s.rpe && s.rpe.scale}
+                </span>
+                                {s.bodyWeight && <p className="text-xs text-gray-400">{s.bodyWeight} kg</p>}
+                            </div>
+                            <button
+                                onClick={() => setEditing(s)}
+                                className="text-xs text-gray-400 hover:text-blue-600 border border-gray-200 px-2 py-1 rounded-lg transition"
+                            >
+                                Editar
+                            </button>
                         </div>
                     </div>
 
