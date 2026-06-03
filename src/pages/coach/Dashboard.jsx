@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { auth } from '../../firebase/config'
 import { signOut } from 'firebase/auth'
 import ExerciseLibrary from '../../components/coach/ExerciseLibrary'
+import PlanningModule from '../../components/coach/PlanningModule'
 
 export default function CoachDashboard() {
     const { user } = useAuth()
@@ -10,7 +11,7 @@ export default function CoachDashboard() {
 
     const tabs = [
         { id: 'library', label: 'Biblioteca' },
-        { id: 'planning', label: 'Planificación' },
+        { id: 'planning', label: 'Planificacion' },
         { id: 'athletes', label: 'Atletas' },
     ]
 
@@ -21,11 +22,8 @@ export default function CoachDashboard() {
                     <h1 className="text-lg font-bold text-gray-800">Training App</h1>
                     <p className="text-xs text-gray-500">{user.email} · Entrenador</p>
                 </div>
-                <button
-                    onClick={() => signOut(auth)}
-                    className="text-sm text-gray-500 hover:text-red-500 transition"
-                >
-                    Cerrar sesión
+                <button onClick={() => signOut(auth)} className="text-sm text-gray-500 hover:text-red-500 transition">
+                    Cerrar sesion
                 </button>
             </header>
 
@@ -35,11 +33,7 @@ export default function CoachDashboard() {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`px-4 py-3 text-sm font-medium border-b-2 transition ${
-                                activeTab === tab.id
-                                    ? 'border-blue-600 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                            }`}
+                            className={"px-4 py-3 text-sm font-medium border-b-2 transition " + (activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700')}
                         >
                             {tab.label}
                         </button>
@@ -49,15 +43,9 @@ export default function CoachDashboard() {
 
             <main className="max-w-4xl mx-auto px-4 py-6">
                 {activeTab === 'library' && <ExerciseLibrary />}
-                {activeTab === 'planning' && (
-                    <div className="text-center text-gray-400 py-12">
-                        Planificación — próximamente
-                    </div>
-                )}
+                {activeTab === 'planning' && <PlanningModule />}
                 {activeTab === 'athletes' && (
-                    <div className="text-center text-gray-400 py-12">
-                        Gestión de atletas — próximamente
-                    </div>
+                    <div className="text-center text-gray-400 py-12">Gestion de atletas — proximamente</div>
                 )}
             </main>
         </div>
