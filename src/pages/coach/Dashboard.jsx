@@ -4,6 +4,7 @@ import { auth } from '../../firebase/config'
 import { signOut } from 'firebase/auth'
 import ExerciseLibrary from '../../components/coach/ExerciseLibrary'
 import PlanningModule from '../../components/coach/PlanningModule'
+import AthletesModule from '../../components/coach/AthletesModule'
 
 export default function CoachDashboard() {
     const { user } = useAuth()
@@ -44,9 +45,7 @@ export default function CoachDashboard() {
             <main className="max-w-4xl mx-auto px-4 py-6">
                 {activeTab === 'library' && <ExerciseLibrary />}
                 {activeTab === 'planning' && <PlanningModule />}
-                {activeTab === 'athletes' && (
-                    <div className="text-center text-gray-400 py-12">Gestion de atletas — proximamente</div>
-                )}
+                {activeTab === 'athletes' && <AthletesModule />}
             </main>
         </div>
     )

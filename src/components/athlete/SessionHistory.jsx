@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 import { useAuth } from '../../contexts/AuthContext'
+import SessionFeedback from './SessionFeedback'
 
 export default function SessionHistory() {
     const { user } = useAuth()
@@ -42,41 +43,39 @@ export default function SessionHistory() {
                         </div>
                         <div className="text-right space-y-1">
               <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-medium block">
-                RPE {s.rpe?.value} — {s.rpe?.scale}
+                RPE {s.rpe && s.rpe.value} - {s.rpe && s.rpe.scale}
               </span>
-                            {s.bodyWeight && (
-                                <p className="text-xs text-gray-400">{s.bodyWeight} kg</p>
-                            )}
+                            {s.bodyWeight && <p className="text-xs text-gray-400">{s.bodyWeight} kg</p>}
                         </div>
                     </div>
 
-                    {s.exercises?.length > 0 && (
+                    {s.exercises && s.exercises.length > 0 && (
                         <div className="space-y-2">
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Ejercicios</p>
-                            {s.exercises.map((ex, i) => (
-                                <div key={i} className="bg-gray-50 rounded-xl p-3 space-y-1">
-                                    <p className="text-sm font-medium text-gray-800">{ex.exerciseName}</p>
-                                    <div className="flex gap-4 text-xs text-gray-500">
-                                        {ex.prescribed?.sets && (
-                                            <span className="text-gray-400">
-                        Prescrito: {ex.prescribed.sets}x{ex.prescribed.reps}
-                                                {ex.prescribed.load ? ` @ ${ex.prescribed.load}${ex.prescribed.unit}` : ''}
-                      </span>
+                            {s.exercises.map(function(ex, i) {
+                                return (
+                                    <div key={i} className="bg-gray-50 rounded-xl p-3 space-y-1">
+                                        <p className="text-sm font-medium text-gray-800">{ex.exerciseName}</p>
+                                        <div className="flex gap-4 text-xs">
+                                            {ex.prescribed && ex.prescribed.sets && (
+                                                <span className="text-gray-400">
+                          Prescrito: {ex.prescribed.sets}x{ex.prescribed.reps}
+                                                    {ex.prescribed.load ? ' @ ' + ex.prescribed.load + ex.prescribed.unit : ''}
+                        </span>
+                                            )}
+                                            {ex.actual && ex.actual.sets && (
+                                                <span className="text-blue-600">
+                          Real: {ex.actual.sets}x{ex.actual.reps}
+                                                    {ex.actual.load ? ' @ ' + ex.actual.load + ex.actual.unit : ''}
+                        </span>
+                                            )}
+                                        </div>
+                                        {ex.actual && ex.actual.notes && (
+                                            <p className="text-xs text-gray-400 italic">{ex.actual.notes}</p>
                                         )}
                                     </div>
-                                    <div className="flex gap-4 text-xs text-blue-600">
-                                        {ex.actual?.sets && (
-                                            <span>
-                        Real: {ex.actual.sets}x{ex.actual.reps}
-                                                {ex.actual.load ? ` @ ${ex.actual.load}${ex.actual.unit}` : ''}
-                      </span>
-                                        )}
-                                    </div>
-                                    {ex.actual?.notes && (
-                                        <p className="text-xs text-gray-400 italic">{ex.actual.notes}</p>
-                                    )}
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     )}
 
@@ -85,6 +84,8 @@ export default function SessionHistory() {
                             <p className="text-xs text-gray-400 italic">{s.notes}</p>
                         </div>
                     )}
+
+                    <SessionFeedback sessionId={s.id} />
                 </div>
             ))}
         </div>
