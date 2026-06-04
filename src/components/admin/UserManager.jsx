@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../../firebase/config'
+import { db } from '../../firebase/config.js'
 
 const ROLES = ['pending', 'athlete', 'coach', 'admin']
 const ROLE_LABELS = { pending: 'Pendiente', athlete: 'Atleta', coach: 'Entrenador', admin: 'Admin' }
