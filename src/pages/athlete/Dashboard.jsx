@@ -6,6 +6,7 @@ import WeekPlan from '../../components/athlete/WeekPlan'
 import SessionHistory from '../../components/athlete/SessionHistory'
 import RMTracker from '../../components/athlete/RMTracker'
 import WorkloadChart from '../../components/shared/WorkloadChart'
+import NutritionLog from '../../components/athlete/NutritionLog'
 
 export default function AthleteDashboard() {
     const { user } = useAuth()
@@ -16,6 +17,7 @@ export default function AthleteDashboard() {
         { id: 'history', label: 'Historial' },
         { id: 'rm', label: 'Mis RM' },
         { id: 'progress', label: 'Progreso' },
+        { id: 'nutrition', label: 'Nutricion' },
     ]
 
     return (
@@ -49,6 +51,7 @@ export default function AthleteDashboard() {
                 {activeTab === 'history' && <SessionHistory />}
                 {activeTab === 'rm' && <RMTracker />}
                 {activeTab === 'progress' && <WorkloadChart userId={user.uid} />}
+                {activeTab === 'nutrition' && <NutritionLog />}
             </main>
         </div>
     )

@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
-import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../../firebase/config.js'
+import { collection, getDocs, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from '../../firebase/config'
 
-const ROLES = ['pending', 'athlete', 'coach', 'admin']
-const ROLE_LABELS = { pending: 'Pendiente', athlete: 'Atleta', coach: 'Entrenador', admin: 'Admin' }
+const ROLES = ['pending', 'athlete', 'coach', 'nutritionist', 'admin']
+const ROLE_LABELS = { pending: 'Pendiente', athlete: 'Atleta', coach: 'Entrenador', nutritionist: 'Nutricionista', admin: 'Admin' }
 const ROLE_COLORS = {
     pending: 'bg-yellow-50 text-yellow-700',
     athlete: 'bg-blue-50 text-blue-700',
     coach: 'bg-green-50 text-green-700',
+    nutritionist: 'bg-orange-50 text-orange-700',
     admin: 'bg-purple-50 text-purple-700',
 }
 
@@ -82,13 +83,10 @@ export default function UserManager() {
                     {pending.map(u => (
                         <div key={u.uid} className="flex items-center justify-between bg-white rounded-xl p-3 border border-yellow-100">
                             <p className="text-sm text-gray-700">{u.email}</p>
-                            <div className="flex gap-2">
-                                <button onClick={() => updateRole(u.uid, 'athlete')} disabled={saving[u.uid]} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition disabled:opacity-40">
-                                    Atleta
-                                </button>
-                                <button onClick={() => updateRole(u.uid, 'coach')} disabled={saving[u.uid]} className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition disabled:opacity-40">
-                                    Entrenador
-                                </button>
+                            <div className="flex gap-2 flex-wrap">
+                                <button onClick={() => updateRole(u.uid, 'athlete')} disabled={saving[u.uid]} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition disabled:opacity-40">Atleta</button>
+                                <button onClick={() => updateRole(u.uid, 'coach')} disabled={saving[u.uid]} className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition disabled:opacity-40">Entrenador</button>
+                                <button onClick={() => updateRole(u.uid, 'nutritionist')} disabled={saving[u.uid]} className="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-lg hover:bg-orange-600 transition disabled:opacity-40">Nutricionista</button>
                             </div>
                         </div>
                     ))}
@@ -98,7 +96,7 @@ export default function UserManager() {
             {confirmDelete && (
                 <div className="bg-red-50 border border-red-200 rounded-2xl p-4 space-y-3">
                     <p className="text-sm font-medium text-red-800">Eliminar este usuario del sistema?</p>
-                    <p className="text-xs text-red-600">Solo se elimina de Firestore, no de Firebase Auth. El usuario no podra acceder a la app.</p>
+                    <p className="text-xs text-red-600">Solo se elimina de Firestore. El usuario no podra acceder a la app.</p>
                     <div className="flex gap-2">
                         <button onClick={() => setConfirmDelete(null)} className="flex-1 border border-gray-300 text-gray-600 rounded-xl py-2 text-sm hover:bg-gray-50 transition">Cancelar</button>
                         <button onClick={handleDelete} disabled={deleting} className="flex-1 bg-red-500 text-white rounded-xl py-2 text-sm font-medium hover:bg-red-600 transition disabled:opacity-40">{deleting ? 'Eliminando...' : 'Si, eliminar'}</button>
@@ -157,9 +155,7 @@ export default function UserManager() {
                         </div>
                     </div>
                 ))}
-                {filtered.length === 0 && (
-                    <p className="text-center text-gray-400 py-8 text-sm">No hay usuarios con esos filtros</p>
-                )}
+                {filtered.length === 0 && <p className="text-center text-gray-400 py-8 text-sm">No hay usuarios con esos filtros</p>}
             </div>
 
             <div className="bg-gray-50 rounded-2xl border border-gray-200 p-4">
