@@ -1,63 +1,46 @@
-import { useEffect, useState } from 'react'
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { db } from '../../firebase/config'
+import { useState } from 'react'
 import AthleteSessionReview from './AthleteSessionReview'
+import PhysioProceduresView from './PhysioProceduresView'
 
-export default function AthletesModule() {
-    const [athletes, setAthletes] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [selected, setSelected] = useState(null)
+export default function AthletesModule({ selectedAthlete }) {
+    const [activeTab, setActiveTab] = useState('sessions')
 
-    useEffect(() => { fetchAthletes() }, [])
-
-    async function fetchAthletes() {
-        const snap = await getDocs(query(collection(db, 'users'), where('role', '==', 'athlete')))
-        const data = snap.docs.map(d => ({ uid: d.id, ...d.data() }))
-        setAthletes(data)
-        setLoading(false)
-    }
-
-    if (selected) {
+    if (!selectedAthlete) {
         return (
-            <AthleteSessionReview
-                athleteEmail={selected.email}
-                athleteUid={selected.uid}
-                onBack={() => setSelected(null)}
-            />
+            <div className="text-center text-gray-400 py-12">
+                <p className="font-medium">Selecciona un atleta</p>
+                <p className="text-sm mt-1">Elige un atleta en la barra superior para ver sus sesiones</p>
+            </div>
         )
     }
 
-    if (loading) return <p className="text-center text-gray-400 py-12">Cargando atletas...</p>
-
-    if (athletes.length === 0) return (
-        <div className="text-center text-gray-400 py-12">
-            <p className="font-medium">Sin atletas registrados</p>
-        </div>
-    )
-
     return (
         <div className="space-y-4">
-            <div>
-                <h2 className="font-bold text-gray-800 text-lg">Atletas</h2>
-                <p className="text-xs text-gray-400">{athletes.length} atletas registrados</p>
+            <div className="flex gap-2">
+                <button
+                    onClick={() => setActiveTab('sessions')}
+                    className={"px-4 py-2 rounded-xl text-sm font-medium border transition " + (activeTab === 'sessions' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-300 hover:border-blue-400')}
+                >
+                    Sesiones ejecutadas
+                </button>
+                <button
+                    onClick={() => setActiveTab('physio')}
+                    className={"px-4 py-2 rounded-xl text-sm font-medium border transition " + (activeTab === 'physio' ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-gray-600 border-gray-300 hover:border-teal-400')}
+                >
+                    Fisioterapia
+                </button>
             </div>
-            <div className="space-y-3">
-                {athletes.map(athlete => (
-                    <div
-                        key={athlete.uid}
-                        onClick={() => setSelected(athlete)}
-                        className="bg-white rounded-2xl border border-gray-200 p-5 cursor-pointer hover:border-blue-300 hover:shadow-sm transition"
-                    >
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="font-bold text-gray-800">{athlete.email}</p>
-                                <p className="text-xs text-gray-400 mt-1">Atleta</p>
-                            </div>
-                            <p className="text-xs text-blue-500">Ver sesiones →</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
+
+            {activeTab === 'sessions' && (
+                <AthleteSessionReview
+                    athleteEmail={selectedAthlete.email}
+                    athleteUid={selectedAthlete.uid}
+                    onBack={() => {}}
+                />
+            )}
+            {activeTab === 'physio' && (
+                <PhysioProceduresView athlete={selectedAthlete} />
+            )}
         </div>
     )
 }

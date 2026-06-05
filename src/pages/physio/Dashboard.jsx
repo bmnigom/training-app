@@ -3,10 +3,12 @@ import { useAuth } from '../../contexts/AuthContext'
 import { auth } from '../../firebase/config'
 import { signOut } from 'firebase/auth'
 import { useAthletes } from '../../hooks/useAthletes'
+import RoleSwitcher from '../../components/shared/RoleSwitcher'
 import PhysioSessionForm from '../../components/physio/PhysioSessionForm'
 import PhysioHistory from '../../components/physio/PhysioHistory'
 import PhysioWorkloadDashboard from '../../components/physio/PhysioWorkloadDashboard'
-import RoleSwitcher from '../../components/shared/RoleSwitcher'
+import PhysioExerciseLibrary from '../../components/physio/PhysioExerciseLibrary'
+import RehabPrescription from '../../components/physio/RehabPrescription'
 
 export default function PhysioDashboard() {
     const { user } = useAuth()
@@ -18,6 +20,8 @@ export default function PhysioDashboard() {
         { id: 'session', label: 'Nueva sesion' },
         { id: 'history', label: 'Historial' },
         { id: 'workload', label: 'Carga muscular' },
+        { id: 'rehab', label: 'Rehabilitacion' },
+        { id: 'library', label: 'Biblioteca' },
     ]
 
     return (
@@ -25,7 +29,7 @@ export default function PhysioDashboard() {
             <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
                 <div>
                     <h1 className="text-lg font-bold text-gray-800">Training App</h1>
-                    <p className="text-xs text-gray-500">{user.email}</p>
+                    <p className="text-xs text-gray-500">{user.email} · Fisioterapeuta</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <RoleSwitcher />
@@ -49,13 +53,13 @@ export default function PhysioDashboard() {
                 </div>
             )}
 
-            <div className="bg-white border-b border-gray-200 px-4">
-                <div className="flex gap-1">
+            <div className="bg-white border-b border-gray-200 px-4 overflow-x-auto">
+                <div className="flex gap-1 min-w-max">
                     {tabs.map(tab => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={"px-4 py-3 text-sm font-medium border-b-2 transition " + (activeTab === tab.id ? 'border-teal-600 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700')}
+                            className={"px-4 py-3 text-sm font-medium border-b-2 transition whitespace-nowrap " + (activeTab === tab.id ? 'border-teal-600 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700')}
                         >
                             {tab.label}
                         </button>
@@ -64,7 +68,9 @@ export default function PhysioDashboard() {
             </div>
 
             <main className="max-w-3xl mx-auto px-4 py-6">
-                {!selectedAthlete ? (
+                {activeTab === 'library' ? (
+                    <PhysioExerciseLibrary />
+                ) : !selectedAthlete ? (
                     <div className="text-center text-gray-400 py-12">
                         <p className="font-medium">Selecciona un atleta</p>
                         <p className="text-sm mt-1">Elige un atleta en la barra superior para continuar</p>
@@ -74,6 +80,7 @@ export default function PhysioDashboard() {
                         {activeTab === 'session' && <PhysioSessionForm athlete={selectedAthlete} />}
                         {activeTab === 'history' && <PhysioHistory athlete={selectedAthlete} />}
                         {activeTab === 'workload' && <PhysioWorkloadDashboard athlete={selectedAthlete} />}
+                        {activeTab === 'rehab' && <RehabPrescription athlete={selectedAthlete} />}
                     </>
                 )}
             </main>
