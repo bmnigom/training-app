@@ -2,16 +2,17 @@ import { useEffect, useState } from 'react'
 import { collection, getDocs, addDoc, deleteDoc, doc, query, where, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 
-const RELATION_TYPES = ['Principal', 'Fuerza', 'Fisioterapia', 'Tecnico-tactico', 'Otro']
+const RELATION_TYPES = ['Principal', 'Fuerza', 'Fisioterapia', 'Nutricion', 'Tecnico-tactico', 'Otro']
+const ROLE_LABELS = { coach: 'Entrenador', nutritionist: 'Nutricionista', physio: 'Fisioterapeuta', admin: 'Admin' }
+const ROLE_COLORS = { coach: 'bg-green-50 text-green-700', nutritionist: 'bg-orange-50 text-orange-700', physio: 'bg-teal-50 text-teal-700', admin: 'bg-purple-50 text-purple-700' }
 
 export default function RelationshipManager() {
     const [athletes, setAthletes] = useState([])
-    const [coaches, setCoaches] = useState([])
+    const [staff, setStaff] = useState([])
     const [relationships, setRelationships] = useState([])
     const [loading, setLoading] = useState(true)
-    const [form, setForm] = useState({ athleteUid: '', coachUid: '', type: 'Principal' })
+    const [form, setForm] = useState({ athleteUid: '', staffUid: '', type: 'Principal' })
     const [saving, setSaving] = useState(false)
-    const [confirmDelete, setConfirmDelete] = useState(null)
 
     useEffect(() => { fetchAll() }, [])
 
@@ -19,30 +20,31 @@ export default function RelationshipManager() {
         const snap = await getDocs(collection(db, 'users'))
         const users = snap.docs.map(d => ({ uid: d.id, ...d.data() }))
         setAthletes(users.filter(u => u.role === 'athlete'))
-        setCoaches(users.filter(u => u.role === 'coach'))
+        setStaff(users.filter(u => ['coach', 'nutritionist', 'physio'].includes(u.role)))
         const relSnap = await getDocs(collection(db, 'relationships'))
         setRelationships(relSnap.docs.map(d => ({ id: d.id, ...d.data() })))
         setLoading(false)
     }
 
     async function handleSave() {
-        if (!form.athleteUid || !form.coachUid) return
-        const exists = relationships.find(r => r.athleteUid === form.athleteUid && r.coachUid === form.coachUid && r.type === form.type)
+        if (!form.athleteUid || !form.staffUid) return
+        const exists = relationships.find(r => r.athleteUid === form.athleteUid && r.coachUid === form.staffUid && r.type === form.type)
         if (exists) return
         setSaving(true)
         try {
-            const athleteUser = athletes.find(a => a.uid === form.athleteUid)
-            const coachUser = coaches.find(c => c.uid === form.coachUid)
+            const athlete = athletes.find(a => a.uid === form.athleteUid)
+            const staffMember = staff.find(s => s.uid === form.staffUid)
             await addDoc(collection(db, 'relationships'), {
                 athleteUid: form.athleteUid,
-                athleteEmail: athleteUser?.email || '',
-                coachUid: form.coachUid,
-                coachEmail: coachUser?.email || '',
+                athleteEmail: athlete?.email || '',
+                coachUid: form.staffUid,
+                coachEmail: staffMember?.email || '',
+                staffRole: staffMember?.role || 'coach',
                 type: form.type,
                 createdAt: serverTimestamp(),
             })
             await fetchAll()
-            setForm({ athleteUid: '', coachUid: '', type: 'Principal' })
+            setForm({ athleteUid: '', staffUid: '', type: 'Principal' })
         } catch (err) {
             console.error(err)
         }
@@ -53,7 +55,6 @@ export default function RelationshipManager() {
         try {
             await deleteDoc(doc(db, 'relationships', id))
             setRelationships(prev => prev.filter(r => r.id !== id))
-            setConfirmDelete(null)
         } catch (err) {
             console.error(err)
         }
@@ -66,8 +67,8 @@ export default function RelationshipManager() {
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="font-bold text-gray-800 text-lg">Vincular atletas y entrenadores</h3>
-                <p className="text-xs text-gray-400 mt-0.5">Asigna uno o varios entrenadores a cada atleta</p>
+                <h3 className="font-bold text-gray-800 text-lg">Vincular atletas con el equipo</h3>
+                <p className="text-xs text-gray-400 mt-0.5">Asigna entrenadores, nutricionistas y fisioterapeutas a cada atleta</p>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
@@ -84,14 +85,18 @@ export default function RelationshipManager() {
                     </select>
                 </div>
                 <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Entrenador</label>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Profesional del equipo</label>
                     <select
-                        value={form.coachUid}
-                        onChange={e => setForm({ ...form, coachUid: e.target.value })}
+                        value={form.staffUid}
+                        onChange={e => setForm({ ...form, staffUid: e.target.value })}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        <option value="">Selecciona un entrenador...</option>
-                        {coaches.map(c => <option key={c.uid} value={c.uid}>{c.email}</option>)}
+                        <option value="">Selecciona...</option>
+                        {staff.map(s => (
+                            <option key={s.uid} value={s.uid}>
+                                {s.email} — {ROLE_LABELS[s.role] || s.role}
+                            </option>
+                        ))}
                     </select>
                 </div>
                 <div>
@@ -106,7 +111,7 @@ export default function RelationshipManager() {
                 </div>
                 <button
                     onClick={handleSave}
-                    disabled={saving || !form.athleteUid || !form.coachUid}
+                    disabled={saving || !form.athleteUid || !form.staffUid}
                     className="w-full bg-blue-600 text-white rounded-xl py-2 text-sm font-medium hover:bg-blue-700 transition disabled:opacity-40"
                 >
                     {saving ? 'Vinculando...' : 'Crear vinculacion'}
@@ -122,22 +127,31 @@ export default function RelationshipManager() {
                         <div key={athlete.uid} className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
                             <p className="font-medium text-gray-800 text-sm">{athlete.email}</p>
                             {relations.length === 0 && (
-                                <p className="text-xs text-gray-400">Sin entrenadores asignados</p>
+                                <p className="text-xs text-gray-400">Sin equipo asignado</p>
                             )}
-                            {relations.map(r => (
-                                <div key={r.id} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2">
-                                    <div>
-                                        <p className="text-xs text-gray-700">{r.coachEmail}</p>
-                                        <span className="text-xs text-blue-600 font-medium">{r.type}</span>
+                            {relations.map(r => {
+                                const staffMember = staff.find(s => s.uid === r.coachUid)
+                                const role = r.staffRole || staffMember?.role || 'coach'
+                                return (
+                                    <div key={r.id} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2">
+                                        <div>
+                                            <p className="text-xs text-gray-700">{r.coachEmail}</p>
+                                            <div className="flex gap-2 mt-0.5">
+                        <span className={"text-xs px-2 py-0.5 rounded-full font-medium " + (ROLE_COLORS[role] || 'bg-gray-100 text-gray-600')}>
+                          {ROLE_LABELS[role] || role}
+                        </span>
+                                                <span className="text-xs text-blue-600 font-medium">{r.type}</span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDelete(r.id)}
+                                            className="text-xs text-gray-400 hover:text-red-500 border border-gray-200 px-2 py-1 rounded-lg transition"
+                                        >
+                                            Quitar
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => handleDelete(r.id)}
-                                        className="text-xs text-gray-400 hover:text-red-500 border border-gray-200 px-2 py-1 rounded-lg transition"
-                                    >
-                                        Quitar
-                                    </button>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     )
                 })}

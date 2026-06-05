@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { collection, getDocs, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 
-const ROLES = ['pending', 'athlete', 'coach', 'nutritionist', 'admin']
-const ROLE_LABELS = { pending: 'Pendiente', athlete: 'Atleta', coach: 'Entrenador', nutritionist: 'Nutricionista', admin: 'Admin' }
+const ROLES = ['pending', 'athlete', 'coach', 'nutritionist', 'physio', 'admin']
+const ROLE_LABELS = { pending: 'Pendiente', athlete: 'Atleta', coach: 'Entrenador', nutritionist: 'Nutricionista', physio: 'Fisioterapeuta', admin: 'Admin' }
 const ROLE_COLORS = {
     pending: 'bg-yellow-50 text-yellow-700',
     athlete: 'bg-blue-50 text-blue-700',
     coach: 'bg-green-50 text-green-700',
     nutritionist: 'bg-orange-50 text-orange-700',
+    physio: 'bg-teal-50 text-teal-700',
     admin: 'bg-purple-50 text-purple-700',
 }
 
@@ -87,6 +88,7 @@ export default function UserManager() {
                                 <button onClick={() => updateRole(u.uid, 'athlete')} disabled={saving[u.uid]} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition disabled:opacity-40">Atleta</button>
                                 <button onClick={() => updateRole(u.uid, 'coach')} disabled={saving[u.uid]} className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition disabled:opacity-40">Entrenador</button>
                                 <button onClick={() => updateRole(u.uid, 'nutritionist')} disabled={saving[u.uid]} className="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-lg hover:bg-orange-600 transition disabled:opacity-40">Nutricionista</button>
+                                <button onClick={() => updateRole(u.uid, 'physio')} disabled={saving[u.uid]} className="text-xs bg-teal-600 text-white px-3 py-1.5 rounded-lg hover:bg-teal-700 transition disabled:opacity-40">Fisio</button>
                             </div>
                         </div>
                     ))}

@@ -7,6 +7,7 @@ import SessionHistory from '../../components/athlete/SessionHistory'
 import RMTracker from '../../components/athlete/RMTracker'
 import WorkloadChart from '../../components/shared/WorkloadChart'
 import NutritionLog from '../../components/athlete/NutritionLog'
+import PhysioAthleteView from '../../components/physio/PhysioAthleteView'
 
 export default function AthleteDashboard() {
     const { user } = useAuth()
@@ -18,6 +19,7 @@ export default function AthleteDashboard() {
         { id: 'rm', label: 'Mis RM' },
         { id: 'progress', label: 'Progreso' },
         { id: 'nutrition', label: 'Nutricion' },
+        { id: 'physio', label: 'Fisioterapia' },
     ]
 
     return (
@@ -52,6 +54,7 @@ export default function AthleteDashboard() {
                 {activeTab === 'rm' && <RMTracker />}
                 {activeTab === 'progress' && <WorkloadChart userId={user.uid} />}
                 {activeTab === 'nutrition' && <NutritionLog />}
+                {activeTab === 'physio' && <PhysioAthleteView />}
             </main>
         </div>
     )

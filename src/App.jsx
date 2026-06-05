@@ -7,6 +7,7 @@ import AthleteDashboard from './pages/athlete/Dashboard'
 import CoachDashboard from './pages/coach/Dashboard'
 import AdminDashboard from './pages/admin/Dashboard'
 import NutritionistDashboard from './pages/nutritionist/Dashboard'
+import PhysioDashboard from './pages/physio/Dashboard'
 
 function AppRoutes() {
     const { user, role } = useAuth()
@@ -16,6 +17,7 @@ function AppRoutes() {
     if (role === 'coach') return <CoachDashboard />
     if (role === 'admin') return <AdminDashboard />
     if (role === 'nutritionist') return <NutritionistDashboard />
+    if (role === 'physio') return <PhysioDashboard />
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
