@@ -17,9 +17,11 @@ const TYPE_COLORS = {
 export default function WeekPlan() {
     const { user } = useAuth()
     const [sessions, setSessions] = useState([])
+    const [allSessions, setAllSessions] = useState([])
     const [mesocycle, setMesocycle] = useState(null)
     const [loading, setLoading] = useState(true)
     const [selectedSession, setSelectedSession] = useState(null)
+    const [weekRange, setWeekRange] = useState({ start: '', end: '' })
 
     const today = new Date().toISOString().split('T')[0]
 
@@ -44,23 +46,36 @@ export default function WeekPlan() {
             const mesoSnap = await getDocs(
                 query(collection(db, 'mesocycles'), where('athleteEmail', '==', user.email))
             )
+            console.log('Mesociclos encontrados:', mesoSnap.size)
             if (mesoSnap.empty) { setLoading(false); return }
 
-            const mesoDoc = mesoSnap.docs[0]
+            const sorted = mesoSnap.docs.sort((a, b) =>
+                new Date(b.data().startDate) - new Date(a.data().startDate)
+            )
+            const mesoDoc = sorted[0]
             const meso = { id: mesoDoc.id, ...mesoDoc.data() }
+            console.log('Mesociclo seleccionado:', meso.name, meso.id)
             setMesocycle(meso)
 
             const sessionSnap = await getDocs(
                 collection(db, 'mesocycles', meso.id, 'plannedSessions')
             )
-            const allSessions = sessionSnap.docs.map(d => ({ id: d.id, ...d.data() }))
-            allSessions.sort((a, b) => new Date(a.date) - new Date(b.date))
+            console.log('Sesiones totales:', sessionSnap.size)
 
-            const { start, end } = getWeekRange()
-            const weekSessions = allSessions.filter(s => s.date >= start && s.date <= end)
-            setSessions(weekSessions)
+            const all = sessionSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+            all.sort((a, b) => new Date(a.date) - new Date(b.date))
+            setAllSessions(all)
+            console.log('Fechas sesiones:', all.map(s => s.date))
+
+            const range = getWeekRange()
+            setWeekRange(range)
+            console.log('Rango semana:', range.start, 'a', range.end)
+
+            const week = all.filter(s => s.date >= range.start && s.date <= range.end)
+            console.log('Sesiones esta semana:', week.length)
+            setSessions(week)
         } catch (err) {
-            console.error(err)
+            console.error('Error fetchPlan:', err)
         }
         setLoading(false)
     }
@@ -102,6 +117,13 @@ export default function WeekPlan() {
                 </div>
                 {mesocycle.objective && <p className="text-xs text-gray-500 mt-2 italic">{mesocycle.objective}</p>}
             </div>
+
+            {allSessions.length > 0 && sessions.length === 0 && (
+                <div className="bg-yellow-50 rounded-xl p-3">
+                    <p className="text-xs text-yellow-700 font-medium">Hay {allSessions.length} sesiones en el ciclo pero ninguna esta semana ({weekRange.start} a {weekRange.end})</p>
+                    <p className="text-xs text-yellow-600 mt-1">Fechas disponibles: {allSessions.map(s => s.date).join(', ')}</p>
+                </div>
+            )}
 
             <div>
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Esta semana</p>
