@@ -10,6 +10,8 @@ import NutritionLog from '../../components/athlete/NutritionLog'
 import PhysioAthleteView from '../../components/physio/PhysioAthleteView'
 import RoleSwitcher from '../../components/shared/RoleSwitcher'
 import NotificationBell from '../../components/athlete/NotificationBell'
+import RecoveryLog from '../../components/athlete/RecoveryLog'
+import RecoveryChart from '../../components/shared/RecoveryChart'
 
 export default function AthleteDashboard() {
     const { user } = useAuth()
@@ -22,6 +24,7 @@ export default function AthleteDashboard() {
         { id: 'progress', label: 'Progreso' },
         { id: 'nutrition', label: 'Nutricion' },
         { id: 'physio', label: 'Fisioterapia' },
+        { id: 'recovery', label: 'Recuperacion' },
     ]
 
     return (
@@ -61,6 +64,12 @@ export default function AthleteDashboard() {
                 {activeTab === 'progress' && <WorkloadChart userId={user.uid} />}
                 {activeTab === 'nutrition' && <NutritionLog />}
                 {activeTab === 'physio' && <PhysioAthleteView />}
+                {activeTab === 'recovery' && (
+                    <div className="space-y-4">
+                        <RecoveryChart userId={user.uid} />
+                        <RecoveryLog />
+                    </div>
+                )}
             </main>
         </div>
     )
