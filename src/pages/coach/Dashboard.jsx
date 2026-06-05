@@ -11,13 +11,13 @@ import RoleSwitcher from '../../components/shared/RoleSwitcher'
 export default function CoachDashboard() {
     const { user } = useAuth()
     const { athletes, loading: loadingAthletes } = useAthletes()
-    const [activeTab, setActiveTab] = useState('library')
+    const [activeTab, setActiveTab] = useState('planning')
     const [selectedAthlete, setSelectedAthlete] = useState(null)
 
     const tabs = [
-        { id: 'library', label: 'Biblioteca' },
         { id: 'planning', label: 'Planificacion' },
         { id: 'athletes', label: 'Atletas' },
+        { id: 'library', label: 'Biblioteca' },
     ]
 
     return (

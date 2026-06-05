@@ -14,7 +14,7 @@ export default function NotificationBell() {
     return (
         <div className="relative">
             <button
-                onClick={() => { setOpen(!open); if (!open && unread > 0) markAllRead() }}
+                onClick={() => setOpen(!open)}
                 className="relative p-1.5 rounded-lg hover:bg-gray-100 transition"
             >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
@@ -32,7 +32,22 @@ export default function NotificationBell() {
                 <div className="absolute right-0 top-10 w-72 bg-white rounded-2xl border border-gray-200 shadow-lg z-50 overflow-hidden">
                     <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                         <p className="text-sm font-bold text-gray-800">Notificaciones</p>
-                        <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
+                        <div className="flex items-center gap-2">
+                            {unread > 0 && (
+                                <button
+                                    onClick={markAllRead}
+                                    className="text-xs text-blue-500 hover:text-blue-700 transition"
+                                >
+                                    Marcar leidas
+                                </button>
+                            )}
+                            <button
+                                onClick={() => setOpen(false)}
+                                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+                            >
+                                ×
+                            </button>
+                        </div>
                     </div>
                     {notifications.length === 0 ? (
                         <div className="px-4 py-6 text-center">
