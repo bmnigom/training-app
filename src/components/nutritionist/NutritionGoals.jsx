@@ -11,6 +11,7 @@ export default function NutritionGoals() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
+    const [athleteLoad, setAthleteLoad] = useState(null)
 
     useEffect(() => { fetchAthletes() }, [])
 
@@ -37,9 +38,43 @@ export default function NutritionGoals() {
         }
     }
 
+    async function fetchAthleteLoad(athleteUid) {
+        const weekStart = new Date()
+        const day = weekStart.getDay()
+        weekStart.setDate(weekStart.getDate() - (day === 0 ? 6 : day - 1))
+        const weekStartStr = weekStart.toISOString().split('T')[0]
+
+        const snap = await getDocs(
+            query(
+                collection(db, 'executedSessions'),
+                where('userId', '==', athleteUid),
+                where('date', '>=', weekStartStr)
+            )
+        )
+        const sessions = snap.docs.map(d => d.data())
+        const rpeValues = sessions.filter(s => s.rpe?.value).map(s => parseFloat(s.rpe.value))
+        const avgRpe = rpeValues.length
+            ? Math.round(rpeValues.reduce((a, b) => a + b, 0) / rpeValues.length * 10) / 10
+            : null
+
+        let totalVol = 0
+        sessions.forEach(s => {
+            if (s.exercises) {
+                s.exercises.forEach(ex => {
+                    const sets = parseFloat(ex.actual?.sets || 0)
+                    const reps = parseFloat(ex.actual?.reps || 0)
+                    const load = parseFloat(ex.actual?.load || 0)
+                    totalVol += sets * reps * load
+                })
+            }
+        })
+        setAthleteLoad({ sessions: sessions.length, avgRpe, totalVol: Math.round(totalVol) })
+    }
+
     async function handleSelectAthlete(athlete) {
         setSelectedAthlete(athlete)
-        await fetchGoals(athlete.uid)
+        setAthleteLoad(null)
+        await Promise.all([fetchGoals(athlete.uid), fetchAthleteLoad(athlete.uid)])
     }
 
     async function handleSave() {
@@ -92,6 +127,18 @@ export default function NutritionGoals() {
 
             {selectedAthlete && (
                 <>
+                    {athleteLoad && athleteLoad.sessions > 0 && (
+                        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-2">
+                            <p className="text-xs font-bold text-blue-700">Carga de entrenamiento esta semana</p>
+                            <div className="flex gap-4 text-xs text-blue-600">
+                                <span>{athleteLoad.sessions} sesiones</span>
+                                {athleteLoad.avgRpe && <span>RPE promedio: {athleteLoad.avgRpe}</span>}
+                                {athleteLoad.totalVol > 0 && <span>Volumen: {athleteLoad.totalVol.toLocaleString()} kg</span>}
+                            </div>
+                            <p className="text-xs text-blue-500">Considera ajustar las metas calorias segun la carga de esta semana</p>
+                        </div>
+                    )}
+
                     <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
                         <p className="text-sm font-bold text-gray-800">Metas diarias para {selectedAthlete.email}</p>
                         <div>
