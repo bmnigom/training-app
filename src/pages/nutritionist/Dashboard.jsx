@@ -4,6 +4,7 @@ import { auth } from '../../firebase/config'
 import { signOut } from 'firebase/auth'
 import FoodDatabase from '../../components/nutritionist/FoodDatabase'
 import NutritionGoals from '../../components/nutritionist/NutritionGoals'
+import RoleSwitcher from '../../components/shared/RoleSwitcher'
 
 export default function NutritionistDashboard() {
     const { user } = useAuth()
@@ -19,11 +20,14 @@ export default function NutritionistDashboard() {
             <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
                 <div>
                     <h1 className="text-lg font-bold text-gray-800">Training App</h1>
-                    <p className="text-xs text-gray-500">{user.email} · Nutricionista</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
                 </div>
-                <button onClick={() => signOut(auth)} className="text-sm text-gray-500 hover:text-red-500 transition">
-                    Cerrar sesion
-                </button>
+                <div className="flex items-center gap-3">
+                    <RoleSwitcher />
+                    <button onClick={() => signOut(auth)} className="text-sm text-gray-500 hover:text-red-500 transition">
+                        Cerrar sesion
+                    </button>
+                </div>
             </header>
             <div className="bg-white border-b border-gray-200 px-4">
                 <div className="flex gap-1">

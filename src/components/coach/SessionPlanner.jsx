@@ -1,6 +1,8 @@
+// src/components/coach/SessionPlanner.jsx
 import { useEffect, useState } from 'react'
-import { doc, updateDoc, getDocs, collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { doc, updateDoc, getDocs, collection, addDoc, query, where, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase/config'
+import { createNotification } from '../../hooks/useCreateNotification'
 
 const EMPTY_EX = { exerciseId: '', exerciseName: '', sets: '', reps: '', load: '', unit: 'kg', rpeTarget: '', restTime: '', notes: '' }
 
@@ -35,16 +37,16 @@ export default function SessionPlanner({ session, mesocycle, onBack }) {
         setExercises([...exercises, { ...EMPTY_EX }])
     }
 
-    function removeExercise(index) {
-        setExercises(exercises.filter((_, i) => i !== index))
+    function removeExercise(i) {
+        setExercises(exercises.filter((_, idx) => idx !== i))
     }
 
-    function updateExercise(index, field, value) {
+    function updateExercise(i, field, value) {
         const updated = [...exercises]
-        updated[index][field] = value
+        updated[i][field] = value
         if (field === 'exerciseId') {
             const found = library.find(e => e.id === value)
-            if (found) updated[index].exerciseName = found.name
+            if (found) updated[i].exerciseName = found.name
         }
         setExercises(updated)
     }
@@ -61,6 +63,19 @@ export default function SessionPlanner({ session, mesocycle, onBack }) {
                 doc(db, 'mesocycles', session.mesocycleId, 'plannedSessions', session.id),
                 { exercises }
             )
+            if (exercises.length > 0 && mesocycle?.athleteEmail) {
+                const athleteSnap = await getDocs(
+                    query(collection(db, 'users'), where('email', '==', mesocycle.athleteEmail))
+                )
+                if (!athleteSnap.empty) {
+                    await createNotification({
+                        userId: athleteSnap.docs[0].id,
+                        type: 'plan_updated',
+                        message: 'Tu entrenador actualizo la sesion del ' + session.date,
+                        sessionId: session.id,
+                    })
+                }
+            }
             setSaved(true)
             setTimeout(() => setSaved(false), 3000)
         } catch (err) {
@@ -100,7 +115,7 @@ export default function SessionPlanner({ session, mesocycle, onBack }) {
                 {templates.length === 0 && (
                     <div className="text-center text-gray-400 py-12">
                         <p className="font-medium">Sin plantillas guardadas</p>
-                        <p className="text-sm mt-1">Diseña una sesion y guardala como plantilla</p>
+                        <p className="text-sm mt-1">Disena una sesion y guardala como plantilla</p>
                     </div>
                 )}
                 <div className="space-y-3">
@@ -115,7 +130,7 @@ export default function SessionPlanner({ session, mesocycle, onBack }) {
                                     <p className="font-medium text-gray-800">{t.name}</p>
                                     <p className="text-xs text-gray-400 mt-0.5">{t.sessionType} · {t.exercises && t.exercises.length} ejercicios</p>
                                 </div>
-                                <p className="text-xs text-blue-500">Aplicar →</p>
+                                <p className="text-xs text-blue-500">Aplicar</p>
                             </div>
                             {t.exercises && t.exercises.length > 0 && (
                                 <div className="mt-2 space-y-0.5">

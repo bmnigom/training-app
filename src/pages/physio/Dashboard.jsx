@@ -6,6 +6,7 @@ import { useAthletes } from '../../hooks/useAthletes'
 import PhysioSessionForm from '../../components/physio/PhysioSessionForm'
 import PhysioHistory from '../../components/physio/PhysioHistory'
 import PhysioWorkloadDashboard from '../../components/physio/PhysioWorkloadDashboard'
+import RoleSwitcher from '../../components/shared/RoleSwitcher'
 
 export default function PhysioDashboard() {
     const { user } = useAuth()
@@ -24,11 +25,14 @@ export default function PhysioDashboard() {
             <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
                 <div>
                     <h1 className="text-lg font-bold text-gray-800">Training App</h1>
-                    <p className="text-xs text-gray-500">{user.email} · Fisioterapeuta</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
                 </div>
-                <button onClick={() => signOut(auth)} className="text-sm text-gray-500 hover:text-red-500 transition">
-                    Cerrar sesion
-                </button>
+                <div className="flex items-center gap-3">
+                    <RoleSwitcher />
+                    <button onClick={() => signOut(auth)} className="text-sm text-gray-500 hover:text-red-500 transition">
+                        Cerrar sesion
+                    </button>
+                </div>
             </header>
 
             {athletes.length > 0 && (

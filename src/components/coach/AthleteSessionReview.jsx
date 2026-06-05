@@ -1,8 +1,10 @@
+// src/components/coach/AthleteSessionReview.jsx
 import { useEffect, useState } from 'react'
 import { collection, query, where, orderBy, getDocs, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 import { useAuth } from '../../contexts/AuthContext'
 import WorkloadChart from '../shared/WorkloadChart'
+import { createNotification } from '../../hooks/useCreateNotification'
 
 export default function AthleteSessionReview({ athleteEmail, athleteUid, onBack }) {
   const { user } = useAuth()
@@ -25,7 +27,7 @@ export default function AthleteSessionReview({ athleteEmail, athleteUid, onBack 
     setLoading(false)
   }
 
-  async function sendFeedback(sessionId) {
+  async function sendFeedback(sessionId, sessionDate) {
     const text = feedbackText[sessionId]
     if (!text || !text.trim()) return
     setSaving(prev => ({ ...prev, [sessionId]: true }))
@@ -37,6 +39,12 @@ export default function AthleteSessionReview({ athleteEmail, athleteUid, onBack 
         coachUid: user.uid,
         text,
         createdAt: serverTimestamp(),
+      })
+      await createNotification({
+        userId: athleteUid,
+        type: 'feedback',
+        message: 'Tu entrenador dejo un comentario en tu sesion del ' + sessionDate,
+        sessionId,
       })
       setSaved(prev => ({ ...prev, [sessionId]: true }))
       setFeedbackText(prev => ({ ...prev, [sessionId]: '' }))
@@ -131,7 +139,7 @@ export default function AthleteSessionReview({ athleteEmail, athleteUid, onBack 
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
                   <button
-                      onClick={function() { sendFeedback(s.id) }}
+                      onClick={function() { sendFeedback(s.id, s.date) }}
                       disabled={saving[s.id] || !feedbackText[s.id] || !feedbackText[s.id].trim()}
                       className={"w-full py-2 rounded-xl text-sm font-medium transition " + (saved[s.id] ? 'bg-green-500 text-white' : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40')}
                   >

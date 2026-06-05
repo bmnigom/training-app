@@ -8,6 +8,8 @@ import RMTracker from '../../components/athlete/RMTracker'
 import WorkloadChart from '../../components/shared/WorkloadChart'
 import NutritionLog from '../../components/athlete/NutritionLog'
 import PhysioAthleteView from '../../components/physio/PhysioAthleteView'
+import RoleSwitcher from '../../components/shared/RoleSwitcher'
+import NotificationBell from '../../components/athlete/NotificationBell'
 
 export default function AthleteDashboard() {
     const { user } = useAuth()
@@ -29,9 +31,13 @@ export default function AthleteDashboard() {
                     <h1 className="text-lg font-bold text-gray-800">Training App</h1>
                     <p className="text-xs text-gray-500">{user.email}</p>
                 </div>
-                <button onClick={() => signOut(auth)} className="text-sm text-gray-500 hover:text-red-500 transition">
-                    Cerrar sesion
-                </button>
+                <div className="flex items-center gap-3">
+                    <RoleSwitcher />
+                    <NotificationBell />
+                    <button onClick={() => signOut(auth)} className="text-sm text-gray-500 hover:text-red-500 transition">
+                        Cerrar sesion
+                    </button>
+                </div>
             </header>
 
             <div className="bg-white border-b border-gray-200 px-4">

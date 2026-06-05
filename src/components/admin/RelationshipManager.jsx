@@ -19,8 +19,14 @@ export default function RelationshipManager() {
     async function fetchAll() {
         const snap = await getDocs(collection(db, 'users'))
         const users = snap.docs.map(d => ({ uid: d.id, ...d.data() }))
-        setAthletes(users.filter(u => u.role === 'athlete'))
-        setStaff(users.filter(u => ['coach', 'nutritionist', 'physio'].includes(u.role)))
+        setAthletes(users.filter(u => {
+            const roles = Array.isArray(u.roles) ? u.roles : u.role ? [u.role] : []
+            return roles.includes('athlete')
+        }))
+        setStaff(users.filter(u => {
+            const roles = Array.isArray(u.roles) ? u.roles : u.role ? [u.role] : []
+            return roles.some(r => ['coach', 'nutritionist', 'physio'].includes(r))
+        }))
         const relSnap = await getDocs(collection(db, 'relationships'))
         setRelationships(relSnap.docs.map(d => ({ id: d.id, ...d.data() })))
         setLoading(false)
