@@ -7,6 +7,7 @@ const ROLE_LABELS = {
     coach: 'Entrenador',
     nutritionist: 'Nutricionista',
     physio: 'Fisioterapeuta',
+    doctor: 'Medico',
     admin: 'Admin',
 }
 
@@ -15,6 +16,7 @@ const ROLE_COLORS = {
     coach: 'bg-green-100 text-green-700',
     nutritionist: 'bg-orange-100 text-orange-700',
     physio: 'bg-teal-100 text-teal-700',
+    doctor: 'bg-red-100 text-red-700',
     admin: 'bg-purple-100 text-purple-700',
 }
 

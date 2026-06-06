@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react'
 import { collection, getDocs, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 
-const ALL_ROLES = ['athlete', 'coach', 'nutritionist', 'physio', 'admin']
-const ROLE_LABELS = { athlete: 'Atleta', coach: 'Entrenador', nutritionist: 'Nutricionista', physio: 'Fisioterapeuta', admin: 'Admin' }
+const ALL_ROLES = ['athlete', 'coach', 'nutritionist', 'physio', 'doctor', 'admin']
+const ROLE_LABELS = { athlete: 'Atleta', coach: 'Entrenador', nutritionist: 'Nutricionista', physio: 'Fisioterapeuta', doctor: 'Medico', admin: 'Admin' }
 const ROLE_COLORS = {
     athlete: 'bg-blue-50 text-blue-700',
     coach: 'bg-green-50 text-green-700',
     nutritionist: 'bg-orange-50 text-orange-700',
     physio: 'bg-teal-50 text-teal-700',
+    doctor: 'bg-red-50 text-red-700',
     admin: 'bg-purple-50 text-purple-700',
 }
 
