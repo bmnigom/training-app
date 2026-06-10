@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { useState } from 'react'
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -100,7 +100,6 @@ export default function TodaySession({ session, mesocycleId, onBack }) {
             {execData.map((ex, i) => (
                 <div key={i} className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
                     <p className="font-medium text-gray-800 text-sm">{ex.exerciseName}</p>
-
                     <div className="bg-gray-50 rounded-xl p-3">
                         <p className="text-xs font-medium text-gray-500 mb-1">Prescrito por el entrenador</p>
                         <div className="flex gap-4 text-xs text-gray-600">
@@ -111,7 +110,6 @@ export default function TodaySession({ session, mesocycleId, onBack }) {
                             {ex.prescribed.restTime && <span>Descanso: {ex.prescribed.restTime}seg</span>}
                         </div>
                     </div>
-
                     <p className="text-xs font-medium text-gray-600">Lo que ejecutaste</p>
                     <div className="grid grid-cols-3 gap-2">
                         <div>

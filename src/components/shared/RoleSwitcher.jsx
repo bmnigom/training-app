@@ -1,6 +1,4 @@
 import { useAuth } from '../../contexts/AuthContext'
-import { auth } from '../../firebase/config'
-import { signOut } from 'firebase/auth'
 
 const ROLE_LABELS = {
     athlete: 'Atleta',

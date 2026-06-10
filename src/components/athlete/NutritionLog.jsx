@@ -1,7 +1,24 @@
 import { useEffect, useState } from 'react'
-import { collection, getDocs, addDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp } from 'firebase/firestore'
+import { collection, getDocs, addDoc, deleteDoc, doc, query, where, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 import { useAuth } from '../../contexts/AuthContext'
+
+const MEALS = ['Desayuno', 'Media manana', 'Almuerzo', 'Snack', 'Cena']
+
+function MacroBar({ label, current, goal, color }) {
+    const pct = goal ? Math.min((current / goal) * 100, 100) : 0
+    return (
+        <div className="space-y-1">
+            <div className="flex justify-between text-xs">
+                <span className="text-gray-600">{label}</span>
+                <span className="text-gray-500">{Math.round(current)}{goal ? ' / ' + goal + 'g' : 'g'}</span>
+            </div>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className={"h-full rounded-full transition-all " + color} style={{ width: pct + '%' }} />
+            </div>
+        </div>
+    )
+}
 
 export default function NutritionLog() {
     const { user } = useAuth()
@@ -16,8 +33,6 @@ export default function NutritionLog() {
     const [meal, setMeal] = useState('Desayuno')
     const [water, setWater] = useState('')
     const [saving, setSaving] = useState(false)
-
-    const MEALS = ['Desayuno', 'Media manana', 'Almuerzo', 'Snack', 'Cena']
 
     useEffect(() => { fetchAll() }, [date])
 
@@ -102,23 +117,7 @@ export default function NutritionLog() {
     }), { calories: 0, protein: 0, carbs: 0, fat: 0, water: 0 })
 
     const filteredFoods = foods.filter(f => f.name.toLowerCase().includes(search.toLowerCase())).slice(0, 8)
-
     const getLogsByMeal = (mealName) => logs.filter(l => l.meal === mealName)
-
-    const MacroBar = ({ label, current, goal, color }) => {
-        const pct = goal ? Math.min((current / goal) * 100, 100) : 0
-        return (
-            <div className="space-y-1">
-                <div className="flex justify-between text-xs">
-                    <span className="text-gray-600">{label}</span>
-                    <span className="text-gray-500">{Math.round(current)}{goal ? ' / ' + goal + 'g' : 'g'}</span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className={"h-full rounded-full transition-all " + color} style={{ width: pct + '%' }} />
-                </div>
-            </div>
-        )
-    }
 
     if (loading) return <p className="text-center text-gray-400 py-12">Cargando...</p>
 
@@ -165,18 +164,9 @@ export default function NutritionLog() {
             <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
                 <p className="text-sm font-bold text-gray-800">Registrar agua</p>
                 <div className="flex gap-2">
-                    <input
-                        type="number"
-                        value={water}
-                        onChange={e => setWater(e.target.value)}
-                        step="0.25"
-                        placeholder="0.5"
-                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <input type="number" value={water} onChange={e => setWater(e.target.value)} step="0.25" placeholder="0.5" className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     <span className="flex items-center text-sm text-gray-500 px-2">litros</span>
-                    <button onClick={handleSaveWater} disabled={saving || !water} className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-40">
-                        Agregar
-                    </button>
+                    <button onClick={handleSaveWater} disabled={saving || !water} className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-40">Agregar</button>
                 </div>
             </div>
 
